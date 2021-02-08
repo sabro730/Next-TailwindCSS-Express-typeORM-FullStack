@@ -1,17 +1,16 @@
 import { IsEmail, Length } from 'class-validator'
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, Index, CreateDateColumn, UpdateDateColumn, BeforeInsert } from 'typeorm'
+import { Entity, Column, Index, BeforeInsert, OneToMany } from 'typeorm'
 import bcrypt from 'bcrypt'
-import { classToPlain, Exclude } from 'class-transformer'
+import { Exclude } from 'class-transformer'
 
+import Model from './Model'
+import Post from './Post'
 @Entity('users')
-export class User extends BaseEntity {
+export default class User extends Model {
   constructor(user: Partial<User>) {
     super()
     Object.assign(this, user)
   }
-  @Exclude()
-  @PrimaryGeneratedColumn()
-  id: number
 
   @Index()
   @IsEmail()
@@ -28,18 +27,11 @@ export class User extends BaseEntity {
   @Length(6, 255)
   password: string
 
-  @CreateDateColumn()
-  createAt: Date
-
-  @UpdateDateColumn()
-  updatedAt: Date
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[]
 
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 6)
-  }
-
-  toJSON() {
-    return classToPlain(this)
   }
 }
