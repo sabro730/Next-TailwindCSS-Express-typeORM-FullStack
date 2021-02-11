@@ -1,10 +1,19 @@
-import { Entity, Column, Index, ManyToOne, JoinColumn, BeforeInsert, OneToMany } from 'typeorm'
+import {
+  Entity,
+  Column,
+  Index,
+  ManyToOne,
+  JoinColumn,
+  BeforeInsert,
+  OneToMany,
+} from 'typeorm'
 
 import Model from './Model'
 import User from './User'
 import { makeId, slugify } from '../utils/helpers'
 import Sub from './Sub'
 import Comment from './Comment'
+import { Expose } from 'class-transformer'
 
 @Entity('posts')
 export default class Post extends Model {
@@ -30,6 +39,9 @@ export default class Post extends Model {
   @Column()
   subName: string
 
+  @Column()
+  username: string
+
   @ManyToOne(() => User, (user) => user.posts)
   @JoinColumn({ name: 'username', referencedColumnName: 'username' })
   user: User
@@ -40,6 +52,16 @@ export default class Post extends Model {
 
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[]
+
+  @Expose() get url(): string {
+    return `/r/${this.subName}/${this.identifier}/${this.slug}`
+  }
+
+  // protected url: string
+  // @AfterLoad()
+  // createFields() {
+  //   this.url = `/r/${this.subName}/${this.identifier}/${this.slug}`
+  // }
 
   @BeforeInsert()
   makeIdAndSlug() {
