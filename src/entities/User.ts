@@ -5,6 +5,7 @@ import { Exclude } from 'class-transformer'
 
 import Model from './Model'
 import Post from './Post'
+import Vote from './Vote'
 @Entity('users')
 export default class User extends Model {
   constructor(user: Partial<User>) {
@@ -30,6 +31,9 @@ export default class User extends Model {
 
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[]
+
+  @OneToMany(() => Vote, (vote) => vote.user)
+  votes: Vote[]
 
   @BeforeInsert()
   async hashPassword() {
