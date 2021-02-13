@@ -1,9 +1,19 @@
-import { BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm'
 
 import Model from './Model'
 import Post from './Post'
 import User from './User'
 import { makeId } from '../utils/helpers'
+import Vote from './Vote'
+import { Exclude } from 'class-transformer'
 
 @Entity('comments')
 export default class Comment extends Model {
@@ -28,6 +38,18 @@ export default class Comment extends Model {
 
   @ManyToOne(() => Post, (post) => post.comments, { nullable: false })
   post: Post
+
+  @Exclude()
+  @OneToMany(() => Vote, (vote) => vote.comment)
+  votes: Vote[]
+
+  protected userVote: number
+  setUserVote(user: User) {
+    const index = this.votes?.findIndex(
+      (vote) => vote.username === user.username
+    )
+    this.userVote = index > -1 ? this.votes[index].value : 0
+  }
 
   @BeforeInsert()
   makeIdAndSlug() {
