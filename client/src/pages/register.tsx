@@ -5,6 +5,7 @@ import axios from 'axios'
 import { useRouter } from 'next/router'
 
 import InputGroup from '../components/InputGroup'
+import { useAuthState } from '../context/auth'
 
 export default function Register() {
   const [email, setEmail] = useState('')
@@ -12,6 +13,8 @@ export default function Register() {
   const [password, setPassword] = useState('')
   const [agreement, setAgreement] = useState(false)
   const [errors, setErrors] = useState<any>({})
+
+  const { authenticated } = useAuthState()
 
   const router = useRouter()
 
@@ -32,6 +35,8 @@ export default function Register() {
       setErrors(err.response.data)
     }
   }
+
+  if (authenticated) router.push('/')
 
   return (
     <div className="flex bg-white">
