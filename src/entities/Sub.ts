@@ -1,4 +1,11 @@
-import { Entity, Column, Index, ManyToOne, JoinColumn, OneToMany } from 'typeorm'
+import {
+  Entity,
+  Column,
+  Index,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm'
 
 import Model from './Model'
 import User from './User'
@@ -27,6 +34,9 @@ export default class Sub extends Model {
 
   @Column({ nullable: true })
   bannerUrn: string
+
+  @Column()
+  username: string
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'username', referencedColumnName: 'username' })
