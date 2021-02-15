@@ -9,6 +9,7 @@ import PostCard from '../../components/PostCard'
 import { Sub } from '../../types'
 import { useAuthState } from '../../context/auth'
 import axios from 'axios'
+import Sidebar from '../../components/Sidebar'
 
 const sub = () => {
   // Local state
@@ -134,6 +135,7 @@ const sub = () => {
           {/* Posts & Sidebar */}
           <div className="container flex pt-5">
             <div className="w-160">{postsMarkup}</div>
+            <Sidebar sub={sub} />
           </div>
         </>
       )}
