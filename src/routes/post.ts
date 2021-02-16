@@ -39,7 +39,7 @@ const getPosts = async (_: Request, res: Response) => {
 
     return res.json(posts)
   } catch (err) {
-    return res.json({ error: 'Something went wrong' })
+    return res.status(500).json({ error: 'Something went wrong' })
   }
 }
 
@@ -85,11 +85,35 @@ const commentOnPost = async (req: Request, res: Response) => {
   }
 }
 
+const getPostComments = async (req: Request, res: Response) => {
+  const { identifier, slug } = req.params
+
+  try {
+    const post = await Post.findOneOrFail({ identifier, slug })
+
+    const comments = await Comment.find({
+      where: { post },
+      order: { createdAt: 'DESC' },
+      relations: ['votes'],
+    })
+
+    if (res.locals.user) {
+      comments.forEach((comment) => comment.setUserVote(res.locals.user))
+    }
+
+    return res.json(comments)
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({ error: 'Something went Wrong' })
+  }
+}
+
 const router = Router()
 
 router.post('/', user, auth, createPost)
 router.get('/', user, getPosts)
 router.get('/:identifier/:slug', user, getPost)
 router.post('/:identifier/:slug/comments', user, auth, commentOnPost)
+router.get('/:identifier/:slug/comments', user, getPostComments)
 
 export default router
