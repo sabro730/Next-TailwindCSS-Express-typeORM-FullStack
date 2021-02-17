@@ -12,14 +12,15 @@ import Sidebar from '../../../../components/Sidebar'
 import { Post, Comment } from '../../../../types'
 import { useAuthState } from '../../../../context/auth'
 import ActionButton from '../../../../components/ActionButton'
+import { FormEvent, useState } from 'react'
 
 dayjs.extend(relativeTime)
 
 const postPage = () => {
   // Local state
-
+  const [newComment, setNewComment] = useState('')
   // Global State
-  const { authenticated } = useAuthState()
+  const { authenticated, user } = useAuthState()
 
   // Utils
   const router = useRouter()
@@ -57,6 +58,24 @@ const postPage = () => {
   }
 
   if (error) router.push('/')
+
+  const submitComment = async (event: FormEvent) => {
+    event.preventDefault()
+    if (newComment.trim() === '') return
+
+    try {
+      await axios.post(`/posts/${post.identifier}/${post.slug}/comments`, {
+        body: newComment,
+      })
+
+      setNewComment('')
+
+      revalidate()
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   return (
     <>
       <Head>
@@ -157,6 +176,52 @@ const postPage = () => {
                   </div>
                 </div>
                 {/* Comment input area */}
+                <div className="pl-10 pr-6 mb-4">
+                  {authenticated ? (
+                    <div>
+                      <p className="mb-1 text-xs">
+                        Comment as{' '}
+                        <Link href={`/u/${user.username}`}>
+                          <a className="font-semibold text-blue-500">
+                            {user.username}
+                          </a>
+                        </Link>
+                      </p>
+                      <form onSubmit={submitComment}>
+                        <textarea
+                          className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-gray-600"
+                          onChange={(e) => setNewComment(e.target.value)}
+                          value={newComment}
+                        ></textarea>
+                        <div className="flex justify-end">
+                          <button
+                            type="submit"
+                            className="px-3 py-1 blue button"
+                            disabled={newComment.trim() === ''}
+                          >
+                            Comment
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between px-2 py-4 border border-gray-200 rounded">
+                      <p className="font-semibold text-gray-400">
+                        Log in or sign up to leave a comment
+                      </p>
+                      <div>
+                        <Link href="/login">
+                          <a className="px-4 py-1 mr-4 hollow blue button">
+                            Login
+                          </a>
+                        </Link>
+                        <Link href="/register">
+                          <a className="px-4 py-1 blue button">Sign Up</a>
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <hr />
                 {/* Comments feed */}
                 {comments?.map((comment) => (
