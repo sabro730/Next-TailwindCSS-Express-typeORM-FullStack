@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { GetServerSideProps } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { FormEvent, useState } from 'react'
@@ -83,6 +84,19 @@ const submit: React.FC = () => {
       {sub && <Sidebar sub={sub} />}
     </div>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  try {
+    const cookie = req.headers.cookie
+    if (!cookie) throw new Error('Missin auth token cookie')
+
+    await axios.get('/auth/me', { headers: { cookie } })
+
+    return { props: {} }
+  } catch (err) {
+    res.writeHead(307, { Location: '/login' }).end()
+  }
 }
 
 export default submit
