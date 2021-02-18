@@ -44,6 +44,7 @@ export interface Comment {
   identifier: string
   body: string
   username: string
+  post?: Post
   // Virtuals
   userVote: number
   voteScore: number
