@@ -23,6 +23,7 @@ export default function Home() {
     size: page,
     setSize: setPage,
     isValidating,
+    revalidate,
   } = useSWRInfinite((index) => `/posts?page=${index}`)
 
   const posts: Post[] = data ? [].concat(...data) : []
@@ -63,7 +64,11 @@ export default function Home() {
         <div className="w-full px-4 md:w-160 md:p-0">
           {isValidating && <p className="text-lg text-center">Loading...</p>}
           {posts?.map((post) => (
-            <PostCard post={post} key={post.identifier} />
+            <PostCard
+              post={post}
+              key={post.identifier}
+              revalidate={revalidate}
+            />
           ))}
           {isValidating && posts.length > 0 && (
             <p className="text-lg text-center">Loading more...</p>
