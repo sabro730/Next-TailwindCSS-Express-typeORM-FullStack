@@ -6,13 +6,40 @@ import { Post, Sub } from '../types'
 import PostCard from '../components/PostCard'
 import Image from 'next/image'
 import { useAuthState } from '../context/auth'
+import { useEffect, useState } from 'react'
 // import { GetServerSideProps } from 'next'
 
 export default function Home() {
+  const [observedPost, setObservedPost] = useState('')
   const { data: posts } = useSWR<Post[]>('/posts')
   const { data: topSubs } = useSWR<Sub[]>('/misc/top-subs')
 
   const { authenticated } = useAuthState()
+
+  useEffect(() => {
+    if (!posts || posts.length === 0) return
+
+    const id = posts[posts.length - 1].identifier
+
+    if (id !== observedPost) {
+      setObservedPost(id)
+      observeElement(document.getElementById(id))
+    }
+  }, [posts])
+
+  const observeElement = (element: HTMLElement) => {
+    if (!element) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting === true) {
+          console.log('Reached bottom of post')
+          observer.unobserve(element)
+        }
+      },
+      { threshold: 1 }
+    )
+    observer.observe(element)
+  }
 
   return (
     <>
