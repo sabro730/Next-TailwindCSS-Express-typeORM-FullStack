@@ -61,11 +61,12 @@ export default function Home() {
       <div className="container flex pt-4">
         {/* Post feed */}
         <div className="w-full px-4 md:w-160 md:p-0">
+          {isValidating && <p className="text-lg text-center">Loading...</p>}
           {posts?.map((post) => (
             <PostCard post={post} key={post.identifier} />
           ))}
           {isValidating && posts.length > 0 && (
-            <p className="text-lg text-center">Loading...</p>
+            <p className="text-lg text-center">Loading more...</p>
           )}
         </div>
         {/* Sidebar */}
