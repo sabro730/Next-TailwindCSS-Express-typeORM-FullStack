@@ -6,11 +6,14 @@ import classNames from 'classnames'
 
 import { Post } from '../types'
 import ActionButton from './ActionButton'
+import { useAuthState } from '../context/auth'
+import { useRouter } from 'next/router'
 
 dayjs.extend(relativeTime)
 
 interface PostCardProps {
   post: Post
+  revalidate?: Function
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -27,14 +30,23 @@ const PostCard: React.FC<PostCardProps> = ({
     url,
     username,
   },
+  revalidate,
 }) => {
+  const { authenticated } = useAuthState()
+  const router = useRouter()
+
   const vote = async (value: number) => {
+    if (!authenticated) router.push('/login')
+
+    if (value === userVote) value = 0
+
     try {
       const responseObject = await axios.post('/misc/vote', {
         identifier,
         slug,
         value,
       })
+      if (revalidate) revalidate()
       console.log(responseObject.data)
     } catch (err) {
       console.log(err)
