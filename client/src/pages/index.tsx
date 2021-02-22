@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import useSWR from 'swr'
+import useSWR, { useSWRInfinite } from 'swr'
 
 import { Post, Sub } from '../types'
 import PostCard from '../components/PostCard'
@@ -11,10 +11,21 @@ import { useEffect, useState } from 'react'
 
 export default function Home() {
   const [observedPost, setObservedPost] = useState('')
-  const { data: posts } = useSWR<Post[]>('/posts')
+  // const { data: posts } = useSWR<Post[]>('/posts')
   const { data: topSubs } = useSWR<Sub[]>('/misc/top-subs')
 
   const { authenticated } = useAuthState()
+
+  const {
+    data,
+    error,
+    mutate,
+    size: page,
+    setSize: setPage,
+    isValidating,
+  } = useSWRInfinite((index) => `/posts?page=${index}`)
+
+  const posts: Post[] = data ? [].concat(...data) : []
 
   useEffect(() => {
     if (!posts || posts.length === 0) return
@@ -33,6 +44,7 @@ export default function Home() {
       (entries) => {
         if (entries[0].isIntersecting === true) {
           console.log('Reached bottom of post')
+          setPage(page + 1)
           observer.unobserve(element)
         }
       },
@@ -52,6 +64,9 @@ export default function Home() {
           {posts?.map((post) => (
             <PostCard post={post} key={post.identifier} />
           ))}
+          {isValidating && posts.length > 0 && (
+            <p className="text-lg text-center">Loading...</p>
+          )}
         </div>
         {/* Sidebar */}
         <div className="hidden ml-6 md:block w-80">
