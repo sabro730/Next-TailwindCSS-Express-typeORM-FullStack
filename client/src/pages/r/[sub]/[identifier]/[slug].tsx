@@ -12,13 +12,15 @@ import Sidebar from '../../../../components/Sidebar'
 import { Post, Comment } from '../../../../types'
 import { useAuthState } from '../../../../context/auth'
 import ActionButton from '../../../../components/ActionButton'
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 
 dayjs.extend(relativeTime)
 
 const postPage = () => {
   // Local state
   const [newComment, setNewComment] = useState('')
+  const [description, setDescription] = useState('')
+
   // Global State
   const { authenticated, user } = useAuthState()
 
@@ -29,6 +31,13 @@ const postPage = () => {
   const { data: post, error } = useSWR<Post>(
     identifier && slug ? `/posts/${identifier}/${slug}` : null
   )
+
+  useEffect(() => {
+    if (!post) return
+    let desc = post.body || post.title
+    desc = desc.substring(0, 158).concat('..') // Hello world..
+    setDescription(desc)
+  }, [post])
 
   const { data: comments, revalidate } = useSWR<Comment[]>(
     identifier && slug ? `/posts/${identifier}/${slug}/comments` : null
@@ -80,6 +89,11 @@ const postPage = () => {
     <>
       <Head>
         <title>{post?.title}</title>
+        <meta name="description" content={description}></meta>
+        <meta property="og:description" content={description} />
+        <meta property="og:title" content={post?.title} />
+        <meta property="twitter:description" content={description} />
+        <meta property="twitter:title" content={post?.title} />
       </Head>
       <Link href={`/r/${sub}`}>
         <a>
