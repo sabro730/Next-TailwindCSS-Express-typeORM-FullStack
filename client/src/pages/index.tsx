@@ -19,13 +19,13 @@ export default function Home() {
   const {
     data,
     error,
-    mutate,
     size: page,
     setSize: setPage,
     isValidating,
     revalidate,
   } = useSWRInfinite((index) => `/posts?page=${index}`)
 
+  const isInitialLoading = !data && !error
   const posts: Post[] = data ? [].concat(...data) : []
 
   useEffect(() => {
@@ -62,7 +62,9 @@ export default function Home() {
       <div className="container flex pt-4">
         {/* Post feed */}
         <div className="w-full px-4 md:w-160 md:p-0">
-          {isValidating && <p className="text-lg text-center">Loading...</p>}
+          {isInitialLoading && (
+            <p className="text-lg text-center">Loading...</p>
+          )}
           {posts?.map((post) => (
             <PostCard
               post={post}
